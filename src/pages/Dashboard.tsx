@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Users, Star, UserX, TrendingUp } from "lucide-react";
+import { Search, Users, Star, UserX, TrendingUp, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Lead {
   id: string;
@@ -242,6 +243,12 @@ const Dashboard = () => {
                     <TableCell>{getStatusBadge(lead.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
+                        <Button asChild size="sm" variant="outline">
+                          <Link to={`/lead/${lead.id}`}>
+                            <Eye className="h-3 w-3 mr-1" />
+                            Ver
+                          </Link>
+                        </Button>
                         {lead.status !== "potencial" && (
                           <Button
                             size="sm"
@@ -250,7 +257,6 @@ const Dashboard = () => {
                             className="text-green-600 hover:text-green-700"
                           >
                             <Star className="h-3 w-3" />
-                            Potencial
                           </Button>
                         )}
                         {lead.status !== "descartado" && (
@@ -261,7 +267,6 @@ const Dashboard = () => {
                             className="text-red-600 hover:text-red-700"
                           >
                             <UserX className="h-3 w-3" />
-                            Descartar
                           </Button>
                         )}
                       </div>
