@@ -94,6 +94,7 @@ const LeadDetails = () => {
   const [lead, setLead] = useState<Lead | null>(null);
   const [formData, setFormData] = useState<Lead | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
 
   useEffect(() => {
     // Simulando busca do lead por ID
@@ -121,6 +122,16 @@ const LeadDetails = () => {
     toast({
       title: "Lead atualizado",
       description: "As informações do lead foram salvas com sucesso.",
+    });
+  };
+
+  const handleSaveNotes = () => {
+    // Aqui você salvaria apenas as observações no backend
+    setLead(formData);
+    setIsEditingNotes(false);
+    toast({
+      title: "Observações salvas",
+      description: "As observações foram atualizadas com sucesso.",
     });
   };
 
@@ -362,12 +373,34 @@ const LeadDetails = () => {
 
           {/* Notes */}
           <Card>
-            <CardHeader>
-              <CardTitle>Observações</CardTitle>
-              <CardDescription>Anotações sobre o lead</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Observações</CardTitle>
+                <CardDescription>Anotações sobre o lead</CardDescription>
+              </div>
+              <Button
+                variant={isEditingNotes ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  if (isEditingNotes) {
+                    handleSaveNotes();
+                  } else {
+                    setIsEditingNotes(true);
+                  }
+                }}
+              >
+                {isEditingNotes ? (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Salvar
+                  </>
+                ) : (
+                  "Editar"
+                )}
+              </Button>
             </CardHeader>
             <CardContent>
-              {isEditing ? (
+              {isEditingNotes || isEditing ? (
                 <Textarea
                   placeholder="Adicione suas observações sobre este lead..."
                   value={formData.notes || ""}
@@ -375,9 +408,9 @@ const LeadDetails = () => {
                   rows={10}
                 />
               ) : (
-                <div className="min-h-[200px]">
+                <div className="min-h-[200px] cursor-pointer" onClick={() => setIsEditingNotes(true)}>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {lead.notes || "Nenhuma observação registrada."}
+                    {lead.notes || "Clique aqui para adicionar observações..."}
                   </p>
                 </div>
               )}
