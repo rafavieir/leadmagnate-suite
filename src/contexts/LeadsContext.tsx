@@ -16,6 +16,7 @@ export interface Lead {
   position?: string;
   linkedinUrl?: string;
   lastContact?: string;
+  lossReason?: string;
 }
 
 const mockLeads: Lead[] = [
@@ -96,7 +97,7 @@ const mockLeads: Lead[] = [
 interface LeadsContextType {
   leads: Lead[];
   updateLeadStatus: (leadId: string, newStatus: "novo" | "potencial" | "descartado") => void;
-  moveLeadToStage: (leadId: string, newStage: Lead["pipeline_stage"]) => void;
+  moveLeadToStage: (leadId: string, newStage: Lead["pipeline_stage"], lossReason?: string) => void;
   addLead: (newLead: Omit<Lead, "id">) => void;
   updateLead: (leadId: string, updates: Partial<Lead>) => void;
   getLeadsByStage: (stage: Lead["pipeline_stage"]) => Lead[];
@@ -116,11 +117,11 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  const moveLeadToStage = (leadId: string, newStage: Lead["pipeline_stage"]) => {
+  const moveLeadToStage = (leadId: string, newStage: Lead["pipeline_stage"], lossReason?: string) => {
     setLeads(prev => 
       prev.map(lead => 
         lead.id === leadId 
-          ? { ...lead, pipeline_stage: newStage }
+          ? { ...lead, pipeline_stage: newStage, ...(lossReason && { lossReason }) }
           : lead
       )
     );

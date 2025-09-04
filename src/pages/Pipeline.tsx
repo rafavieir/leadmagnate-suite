@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Phone, Mail, Building } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLeads, type Lead } from "@/contexts/LeadsContext";
+import { LossReasonModal } from "@/components/LossReasonModal";
+import { useState } from "react";
 
 const pipelineStages = [
   { 
@@ -47,6 +49,11 @@ const pipelineStages = [
 
 const Pipeline = () => {
   const { leads, moveLeadToStage, getLeadsByStage, getTotalValue } = useLeads();
+  const [lossModal, setLossModal] = useState<{ open: boolean; leadId: string; leadName: string }>({
+    open: false,
+    leadId: "",
+    leadName: ""
+  });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -57,6 +64,18 @@ const Pipeline = () => {
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleStageChange = (leadId: string, leadName: string, newStage: Lead["pipeline_stage"]) => {
+    if (newStage === "perdido") {
+      setLossModal({ open: true, leadId, leadName });
+    } else {
+      moveLeadToStage(leadId, newStage);
+    }
+  };
+
+  const handleLossConfirm = (reason: string) => {
+    moveLeadToStage(lossModal.leadId, "perdido", reason);
   };
 
   return (
@@ -182,7 +201,7 @@ const Pipeline = () => {
                               <select
                                 className="text-xs border rounded px-1 py-0.5 bg-white"
                                 value={lead.pipeline_stage}
-                                onChange={(e) => moveLeadToStage(lead.id, e.target.value as Lead["pipeline_stage"])}
+                                onChange={(e) => handleStageChange(lead.id, lead.name, e.target.value as Lead["pipeline_stage"])}
                               >
                                 {pipelineStages.map(s => (
                                   <option key={s.key} value={s.key}>
@@ -201,6 +220,13 @@ const Pipeline = () => {
             );
           })}
         </div>
+        
+        <LossReasonModal
+          open={lossModal.open}
+          onOpenChange={(open) => setLossModal(prev => ({ ...prev, open }))}
+          onConfirm={handleLossConfirm}
+          leadName={lossModal.leadName}
+        />
       </div>
     </div>
   );
