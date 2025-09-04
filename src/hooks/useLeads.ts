@@ -12,6 +12,10 @@ export interface Lead {
   pipeline_stage: "prospecto" | "qualificado" | "proposta" | "negociacao" | "fechado" | "perdido";
   value: number;
   createdAt: string;
+  notes?: string;
+  position?: string;
+  linkedinUrl?: string;
+  lastContact?: string;
 }
 
 const mockLeads: Lead[] = [
@@ -26,7 +30,10 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "prospecto",
     value: 15000,
-    createdAt: "2024-01-15"
+    createdAt: "2024-01-15",
+    position: "CEO",
+    notes: "Interessado em soluções de automação para empresa",
+    linkedinUrl: "https://linkedin.com/in/joaosilva"
   },
   {
     id: "2",
@@ -39,7 +46,9 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "qualificado",
     value: 25000,
-    createdAt: "2024-01-14"
+    createdAt: "2024-01-14",
+    position: "CTO",
+    notes: "Empresa em crescimento, orçamento aprovado"
   },
   {
     id: "3",
@@ -52,7 +61,8 @@ const mockLeads: Lead[] = [
     status: "descartado",
     pipeline_stage: "perdido",
     value: 0,
-    createdAt: "2024-01-13"
+    createdAt: "2024-01-13",
+    notes: "Não teve interesse no produto"
   },
   {
     id: "4",
@@ -65,7 +75,8 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "proposta",
     value: 35000,
-    createdAt: "2024-01-12"
+    createdAt: "2024-01-12",
+    position: "Diretora de TI"
   },
   {
     id: "5",

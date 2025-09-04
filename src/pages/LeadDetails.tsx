@@ -13,83 +13,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Save, Star, UserX } from "lucide-react";
+import { ArrowLeft, Save, Star, UserX, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLeads, type Lead } from "@/hooks/useLeads";
 
-interface Lead {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  phone: string;
-  source: string;
-  score: number;
-  status: "novo" | "potencial" | "descartado";
-  createdAt: string;
-  notes?: string;
-  position?: string;
-  linkedinUrl?: string;
-  lastContact?: string;
-}
-
-const mockLeads: Lead[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@empresa.com",
-    company: "TechCorp",
-    phone: "(11) 99999-9999",
-    source: "Website",
-    score: 85,
-    status: "novo",
-    createdAt: "2024-01-15",
-    position: "CEO",
-    notes: "Interessado em soluções de automação para empresa",
-    linkedinUrl: "https://linkedin.com/in/joaosilva"
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@startup.com",
-    company: "StartupXYZ",
-    phone: "(11) 88888-8888",
-    source: "LinkedIn",
-    score: 92,
-    status: "potencial",
-    createdAt: "2024-01-14",
-    position: "CTO",
-    notes: "Empresa em crescimento, orçamento aprovado"
-  },
-  {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro@empresa2.com",
-    company: "InnovateCorp",
-    phone: "(11) 77777-7777",
-    source: "Email Campaign",
-    score: 45,
-    status: "descartado",
-    createdAt: "2024-01-13",
-    notes: "Não teve interesse no produto"
-  },
-  {
-    id: "4",
-    name: "Ana Oliveira",
-    email: "ana@bigcompany.com",
-    company: "BigCompany Ltd",
-    phone: "(11) 66666-6666",
-    source: "Referral",
-    score: 78,
-    status: "novo",
-    createdAt: "2024-01-12",
-    position: "Diretora de TI"
-  },
+const pipelineStages = [
+  { key: "prospecto", title: "Prospecto" },
+  { key: "qualificado", title: "Qualificado" },
+  { key: "proposta", title: "Proposta" },
+  { key: "negociacao", title: "Negociação" },
+  { key: "fechado", title: "Fechado" },
+  { key: "perdido", title: "Perdido" }
 ];
 
 const LeadDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { leads, updateLeadStatus, moveLeadToStage } = useLeads();
   
   const [lead, setLead] = useState<Lead | null>(null);
   const [formData, setFormData] = useState<Lead | null>(null);
@@ -97,13 +38,13 @@ const LeadDetails = () => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
 
   useEffect(() => {
-    // Simulando busca do lead por ID
-    const foundLead = mockLeads.find(l => l.id === id);
+    // Busca o lead nos dados compartilhados
+    const foundLead = leads.find(l => l.id === id);
     if (foundLead) {
       setLead(foundLead);
       setFormData(foundLead);
     }
-  }, [id]);
+  }, [id, leads]);
 
   if (!lead || !formData) {
     return (
@@ -136,13 +77,29 @@ const LeadDetails = () => {
   };
 
   const updateStatus = (newStatus: "potencial" | "descartado") => {
-    const updatedLead = { ...formData, status: newStatus };
-    setFormData(updatedLead);
-    setLead(updatedLead);
-    toast({
-      title: "Status atualizado",
-      description: `Lead marcado como ${newStatus === "potencial" ? "potencial" : "descartado"}.`,
-    });
+    if (lead?.id) {
+      updateLeadStatus(lead.id, newStatus);
+      const updatedLead = { ...formData!, status: newStatus };
+      setFormData(updatedLead);
+      setLead(updatedLead);
+      toast({
+        title: "Status atualizado",
+        description: `Lead marcado como ${newStatus === "potencial" ? "potencial" : "descartado"}.`,
+      });
+    }
+  };
+
+  const updatePipelineStage = (newStage: Lead["pipeline_stage"]) => {
+    if (lead?.id) {
+      moveLeadToStage(lead.id, newStage);
+      const updatedLead = { ...formData!, pipeline_stage: newStage };
+      setFormData(updatedLead);
+      setLead(updatedLead);
+      toast({
+        title: "Estágio atualizado",
+        description: `Lead movido para ${pipelineStages.find(s => s.key === newStage)?.title}.`,
+      });
+    }
   };
 
   const getStatusBadge = (status: Lead["status"]) => {
@@ -182,11 +139,16 @@ const LeadDetails = () => {
           </div>
           <div className="flex items-center gap-2">
             {getStatusBadge(lead.status)}
+            {lead.pipeline_stage && (
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                Pipeline: {pipelineStages.find(s => s.key === lead.pipeline_stage)?.title}
+              </Badge>
+            )}
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {lead.status !== "potencial" && (
             <Button
               variant="outline"
@@ -207,6 +169,29 @@ const LeadDetails = () => {
               Descartar Lead
             </Button>
           )}
+          
+          {/* Pipeline Stage Selector */}
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="pipeline-stage" className="text-sm">
+              Estágio da Pipeline:
+            </Label>
+            <Select
+              value={lead.pipeline_stage || "prospecto"}
+              onValueChange={(value) => updatePipelineStage(value as Lead["pipeline_stage"])}
+            >
+              <SelectTrigger className="w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pipelineStages.map(stage => (
+                  <SelectItem key={stage.key} value={stage.key}>
+                    {stage.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Lead Information */}
