@@ -95,6 +95,15 @@ const LeadDetails = () => {
 
   const updatePipelineStage = (newStage: Lead["pipeline_stage"]) => {
     if (lead?.id) {
+      if (newStage === "perdido" && !formData?.notes?.trim()) {
+        toast({
+          title: "Observação obrigatória",
+          description: "Para marcar como perdido, é necessário adicionar uma observação explicando o motivo.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
       moveLeadToStage(lead.id, newStage);
       const updatedLead = { ...formData!, pipeline_stage: newStage };
       setFormData(updatedLead);
