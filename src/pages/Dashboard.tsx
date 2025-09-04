@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Search, Users, Star, UserX, TrendingUp, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useLeads, type Lead } from "@/hooks/useLeads";
+import { useLeads, type Lead } from "@/contexts/LeadsContext";
 
 const Dashboard = () => {
   const { leads, updateLeadStatus } = useLeads();

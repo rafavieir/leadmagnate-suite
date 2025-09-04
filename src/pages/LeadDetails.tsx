@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Save, Star, UserX, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLeads, type Lead } from "@/hooks/useLeads";
+import { useLeads, type Lead } from "@/contexts/LeadsContext";
 
 const pipelineStages = [
   { key: "prospecto", title: "Prospecto" },
@@ -30,7 +30,7 @@ const LeadDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { leads, updateLeadStatus, moveLeadToStage } = useLeads();
+  const { leads, updateLeadStatus, moveLeadToStage, updateLead } = useLeads();
   
   const [lead, setLead] = useState<Lead | null>(null);
   const [formData, setFormData] = useState<Lead | null>(null);
@@ -57,23 +57,27 @@ const LeadDetails = () => {
   }
 
   const handleSave = () => {
-    // Aqui você salvaria no backend
-    setLead(formData);
-    setIsEditing(false);
-    toast({
-      title: "Lead atualizado",
-      description: "As informações do lead foram salvas com sucesso.",
-    });
+    if (lead?.id && formData) {
+      updateLead(lead.id, formData);
+      setLead(formData);
+      setIsEditing(false);
+      toast({
+        title: "Lead atualizado",
+        description: "As informações do lead foram salvas com sucesso.",
+      });
+    }
   };
 
   const handleSaveNotes = () => {
-    // Aqui você salvaria apenas as observações no backend
-    setLead(formData);
-    setIsEditingNotes(false);
-    toast({
-      title: "Observações salvas",
-      description: "As observações foram atualizadas com sucesso.",
-    });
+    if (lead?.id && formData) {
+      updateLead(lead.id, { notes: formData.notes });
+      setLead(formData);
+      setIsEditingNotes(false);
+      toast({
+        title: "Observações salvas",
+        description: "As observações foram atualizadas com sucesso.",
+      });
+    }
   };
 
   const updateStatus = (newStatus: "potencial" | "descartado") => {

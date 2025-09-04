@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { createContext, useContext, useState } from 'react';
 
 export interface Lead {
   id: string;
@@ -93,7 +93,19 @@ const mockLeads: Lead[] = [
   }
 ];
 
-export const useLeads = () => {
+interface LeadsContextType {
+  leads: Lead[];
+  updateLeadStatus: (leadId: string, newStatus: "novo" | "potencial" | "descartado") => void;
+  moveLeadToStage: (leadId: string, newStage: Lead["pipeline_stage"]) => void;
+  addLead: (newLead: Omit<Lead, "id">) => void;
+  updateLead: (leadId: string, updates: Partial<Lead>) => void;
+  getLeadsByStage: (stage: Lead["pipeline_stage"]) => Lead[];
+  getTotalValue: (stage: Lead["pipeline_stage"]) => number;
+}
+
+const LeadsContext = createContext<LeadsContextType | undefined>(undefined);
+
+export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [leads, setLeads] = useState<Lead[]>(mockLeads);
 
   const updateLeadStatus = (leadId: string, newStatus: "novo" | "potencial" | "descartado") => {
@@ -122,6 +134,14 @@ export const useLeads = () => {
     setLeads(prev => [...prev, lead]);
   };
 
+  const updateLead = (leadId: string, updates: Partial<Lead>) => {
+    setLeads(prev => 
+      prev.map(lead => 
+        lead.id === leadId ? { ...lead, ...updates } : lead
+      )
+    );
+  };
+
   const getLeadsByStage = (stage: Lead["pipeline_stage"]) => {
     return leads.filter(lead => lead.pipeline_stage === stage);
   };
@@ -130,13 +150,25 @@ export const useLeads = () => {
     return getLeadsByStage(stage).reduce((sum, lead) => sum + lead.value, 0);
   };
 
-  return {
-    leads,
-    setLeads,
-    updateLeadStatus,
-    moveLeadToStage,
-    addLead,
-    getLeadsByStage,
-    getTotalValue
-  };
+  return (
+    <LeadsContext.Provider value={{
+      leads,
+      updateLeadStatus,
+      moveLeadToStage,
+      addLead,
+      updateLead,
+      getLeadsByStage,
+      getTotalValue
+    }}>
+      {children}
+    </LeadsContext.Provider>
+  );
+};
+
+export const useLeads = () => {
+  const context = useContext(LeadsContext);
+  if (context === undefined) {
+    throw new Error('useLeads must be used within a LeadsProvider');
+  }
+  return context;
 };

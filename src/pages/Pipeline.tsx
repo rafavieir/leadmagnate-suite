@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Phone, Mail, Building } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useLeads, type Lead } from "@/hooks/useLeads";
+import { useLeads, type Lead } from "@/contexts/LeadsContext";
 
 const pipelineStages = [
   { 
