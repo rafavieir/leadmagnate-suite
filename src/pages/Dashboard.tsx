@@ -134,9 +134,17 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard CRM</h1>
-          <p className="text-muted-foreground">Gerencie seus leads e potenciais clientes</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Dashboard CRM</h1>
+            <p className="text-muted-foreground">Gerencie seus leads e potenciais clientes</p>
+          </div>
+          <Link to="/pipeline">
+            <Button>
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Pipeline de Vendas
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Cards */}
