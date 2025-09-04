@@ -20,78 +20,12 @@ import {
 } from "@/components/ui/select";
 import { Search, Users, Star, UserX, TrendingUp, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface Lead {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  phone: string;
-  source: string;
-  score: number;
-  status: "novo" | "potencial" | "descartado";
-  createdAt: string;
-}
-
-const mockLeads: Lead[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@empresa.com",
-    company: "TechCorp",
-    phone: "(11) 99999-9999",
-    source: "Website",
-    score: 85,
-    status: "novo",
-    createdAt: "2024-01-15"
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@startup.com",
-    company: "StartupXYZ",
-    phone: "(11) 88888-8888",
-    source: "LinkedIn",
-    score: 92,
-    status: "potencial",
-    createdAt: "2024-01-14"
-  },
-  {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro@empresa2.com",
-    company: "InnovateCorp",
-    phone: "(11) 77777-7777",
-    source: "Email Campaign",
-    score: 45,
-    status: "descartado",
-    createdAt: "2024-01-13"
-  },
-  {
-    id: "4",
-    name: "Ana Oliveira",
-    email: "ana@bigcompany.com",
-    company: "BigCompany Ltd",
-    phone: "(11) 66666-6666",
-    source: "Referral",
-    score: 78,
-    status: "novo",
-    createdAt: "2024-01-12"
-  },
-];
+import { useLeads, type Lead } from "@/hooks/useLeads";
 
 const Dashboard = () => {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
+  const { leads, updateLeadStatus } = useLeads();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-
-  const updateLeadStatus = (leadId: string, newStatus: "potencial" | "descartado") => {
-    setLeads(prev => 
-      prev.map(lead => 
-        lead.id === leadId ? { ...lead, status: newStatus } : lead
-      )
-    );
-  };
 
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

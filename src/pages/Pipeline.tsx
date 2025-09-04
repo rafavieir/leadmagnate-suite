@@ -1,92 +1,10 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Phone, Mail, Building } from "lucide-react";
 import { Link } from "react-router-dom";
-
-interface Lead {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  phone: string;
-  source: string;
-  score: number;
-  status: "novo" | "potencial" | "descartado";
-  pipeline_stage: "prospecto" | "qualificado" | "proposta" | "negociacao" | "fechado" | "perdido";
-  value: number;
-  createdAt: string;
-}
-
-const mockPipelineLeads: Lead[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@empresa.com",
-    company: "TechCorp",
-    phone: "(11) 99999-9999",
-    source: "Website",
-    score: 85,
-    status: "potencial",
-    pipeline_stage: "prospecto",
-    value: 15000,
-    createdAt: "2024-01-15"
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@startup.com",
-    company: "StartupXYZ",
-    phone: "(11) 88888-8888",
-    source: "LinkedIn",
-    score: 92,
-    status: "potencial",
-    pipeline_stage: "qualificado",
-    value: 25000,
-    createdAt: "2024-01-14"
-  },
-  {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro@megacorp.com",
-    company: "MegaCorp",
-    phone: "(11) 77777-7777",
-    source: "Indicação",
-    score: 78,
-    status: "potencial",
-    pipeline_stage: "proposta",
-    value: 50000,
-    createdAt: "2024-01-13"
-  },
-  {
-    id: "4",
-    name: "Ana Oliveira",
-    email: "ana@inovacao.com",
-    company: "Inovação Ltda",
-    phone: "(11) 66666-6666",
-    source: "Google Ads",
-    score: 88,
-    status: "potencial",
-    pipeline_stage: "negociacao",
-    value: 35000,
-    createdAt: "2024-01-12"
-  },
-  {
-    id: "5",
-    name: "Carlos Ferreira",
-    email: "carlos@solucoes.com",
-    company: "Soluções Tech",
-    phone: "(11) 55555-5555",
-    source: "Website",
-    score: 95,
-    status: "potencial",
-    pipeline_stage: "fechado",
-    value: 80000,
-    createdAt: "2024-01-10"
-  }
-];
+import { useLeads, type Lead } from "@/hooks/useLeads";
 
 const pipelineStages = [
   { 
@@ -128,23 +46,7 @@ const pipelineStages = [
 ];
 
 const Pipeline = () => {
-  const [leads, setLeads] = useState<Lead[]>(mockPipelineLeads);
-
-  const moveLeadToStage = (leadId: string, newStage: Lead["pipeline_stage"]) => {
-    setLeads(leads.map(lead => 
-      lead.id === leadId 
-        ? { ...lead, pipeline_stage: newStage }
-        : lead
-    ));
-  };
-
-  const getLeadsByStage = (stage: Lead["pipeline_stage"]) => {
-    return leads.filter(lead => lead.pipeline_stage === stage);
-  };
-
-  const getTotalValue = (stage: Lead["pipeline_stage"]) => {
-    return getLeadsByStage(stage).reduce((sum, lead) => sum + lead.value, 0);
-  };
+  const { leads, moveLeadToStage, getLeadsByStage, getTotalValue } = useLeads();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
