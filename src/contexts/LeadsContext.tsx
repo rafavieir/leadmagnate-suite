@@ -52,20 +52,6 @@ const mockLeads: Lead[] = [
     notes: "Empresa em crescimento, orçamento aprovado"
   },
   {
-    id: "3",
-    name: "Pedro Costa",
-    email: "pedro@empresa2.com",
-    company: "InnovateCorp",
-    phone: "(11) 77777-7777",
-    source: "Email Campaign",
-    score: 45,
-    status: "descartado",
-    pipeline_stage: "perdido",
-    value: 0,
-    createdAt: "2024-01-13",
-    notes: "Não teve interesse no produto"
-  },
-  {
     id: "4",
     name: "Ana Oliveira",
     email: "ana@bigcompany.com",
@@ -100,8 +86,11 @@ interface LeadsContextType {
   moveLeadToStage: (leadId: string, newStage: Lead["pipeline_stage"], lossReason?: string) => void;
   addLead: (newLead: Omit<Lead, "id">) => void;
   updateLead: (leadId: string, updates: Partial<Lead>) => void;
+  removeLead: (leadId: string) => void;
   getLeadsByStage: (stage: Lead["pipeline_stage"]) => Lead[];
   getTotalValue: (stage: Lead["pipeline_stage"]) => number;
+  getActiveLeadsValue: () => number;
+  getActiveLeads: () => Lead[];
 }
 
 const LeadsContext = createContext<LeadsContextType | undefined>(undefined);
@@ -110,11 +99,15 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [leads, setLeads] = useState<Lead[]>(mockLeads);
 
   const updateLeadStatus = (leadId: string, newStatus: "novo" | "potencial" | "descartado") => {
-    setLeads(prev => 
-      prev.map(lead => 
-        lead.id === leadId ? { ...lead, status: newStatus } : lead
-      )
-    );
+    if (newStatus === "descartado") {
+      removeLead(leadId);
+    } else {
+      setLeads(prev => 
+        prev.map(lead => 
+          lead.id === leadId ? { ...lead, status: newStatus } : lead
+        )
+      );
+    }
   };
 
   const moveLeadToStage = (leadId: string, newStage: Lead["pipeline_stage"], lossReason?: string) => {
@@ -151,6 +144,18 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return getLeadsByStage(stage).reduce((sum, lead) => sum + lead.value, 0);
   };
 
+  const removeLead = (leadId: string) => {
+    setLeads(prev => prev.filter(lead => lead.id !== leadId));
+  };
+
+  const getActiveLeads = () => {
+    return leads.filter(lead => lead.status !== "descartado" && lead.pipeline_stage !== "perdido");
+  };
+
+  const getActiveLeadsValue = () => {
+    return getActiveLeads().reduce((sum, lead) => sum + lead.value, 0);
+  };
+
   return (
     <LeadsContext.Provider value={{
       leads,
@@ -158,8 +163,11 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       moveLeadToStage,
       addLead,
       updateLead,
+      removeLead,
       getLeadsByStage,
-      getTotalValue
+      getTotalValue,
+      getActiveLeads,
+      getActiveLeadsValue
     }}>
       {children}
     </LeadsContext.Provider>

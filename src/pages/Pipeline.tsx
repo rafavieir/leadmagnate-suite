@@ -47,7 +47,7 @@ const pipelineStages = [
 ];
 
 const Pipeline = () => {
-  const { leads, moveLeadToStage, getLeadsByStage, getTotalValue } = useLeads();
+  const { leads, moveLeadToStage, getLeadsByStage, getTotalValue, getActiveLeads } = useLeads();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -100,7 +100,7 @@ const Pipeline = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(leads.filter(l => !['fechado', 'perdido'].includes(l.pipeline_stage)).reduce((sum, lead) => sum + lead.value, 0))}
+                {formatCurrency(getActiveLeads().filter(l => !['fechado', 'perdido'].includes(l.pipeline_stage)).reduce((sum, lead) => sum + lead.value, 0))}
               </div>
             </CardContent>
           </Card>
@@ -120,7 +120,7 @@ const Pipeline = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {leads.length > 0 ? Math.round((getLeadsByStage("fechado").length / leads.length) * 100) : 0}%
+                {getActiveLeads().length > 0 ? Math.round((getLeadsByStage("fechado").length / getActiveLeads().length) * 100) : 0}%
               </div>
             </CardContent>
           </Card>

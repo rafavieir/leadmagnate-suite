@@ -23,7 +23,7 @@ import { Link } from "react-router-dom";
 import { useLeads, type Lead } from "@/contexts/LeadsContext";
 
 const Dashboard = () => {
-  const { leads, updateLeadStatus } = useLeads();
+  const { leads, updateLeadStatus, getActiveLeadsValue, getActiveLeads } = useLeads();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -35,11 +35,18 @@ const Dashboard = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
   const stats = {
     total: leads.length,
     novos: leads.filter(l => l.status === "novo").length,
     potenciais: leads.filter(l => l.status === "potencial").length,
-    descartados: leads.filter(l => l.status === "descartado").length,
+    valorTotal: getActiveLeadsValue(),
   };
 
   const getStatusBadge = (status: Lead["status"]) => {
@@ -115,11 +122,11 @@ const Dashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Descartados</CardTitle>
-              <UserX className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.descartados}</div>
+              <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.valorTotal)}</div>
             </CardContent>
           </Card>
         </div>
@@ -151,7 +158,6 @@ const Dashboard = () => {
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="novo">Novos</SelectItem>
                   <SelectItem value="potencial">Potenciais</SelectItem>
-                  <SelectItem value="descartado">Descartados</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -165,6 +171,7 @@ const Dashboard = () => {
                   <TableHead>Empresa</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Fonte</TableHead>
+                  <TableHead>Valor</TableHead>
                   <TableHead>Score</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Ações</TableHead>
@@ -177,6 +184,11 @@ const Dashboard = () => {
                     <TableCell>{lead.company}</TableCell>
                     <TableCell>{lead.email}</TableCell>
                     <TableCell>{lead.source}</TableCell>
+                    <TableCell>
+                      <span className="font-semibold text-green-600">
+                        {formatCurrency(lead.value)}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <span className={`font-semibold ${getScoreColor(lead.score)}`}>
                         {lead.score}
