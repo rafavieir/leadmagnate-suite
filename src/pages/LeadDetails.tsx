@@ -16,6 +16,7 @@ import {
 import { ArrowLeft, Save, Star, UserX, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLeads, type Lead } from "@/contexts/LeadsContext";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const pipelineStages = [
   { key: "prospecto", title: "Prospecto" },
@@ -162,6 +163,7 @@ const LeadDetails = () => {
 
         {/* Actions */}
         <div className="flex gap-2 flex-wrap">
+          <WhatsAppButton lead={lead} />
           {lead.status !== "potencial" && (
             <Button
               variant="outline"

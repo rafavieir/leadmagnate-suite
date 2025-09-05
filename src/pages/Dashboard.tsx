@@ -21,6 +21,7 @@ import {
 import { Search, Users, Star, UserX, TrendingUp, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLeads, type Lead } from "@/contexts/LeadsContext";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const Dashboard = () => {
   const { leads, updateLeadStatus, getActiveLeadsValue, getActiveLeads } = useLeads();
@@ -80,12 +81,19 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-foreground">Dashboard CRM</h1>
             <p className="text-muted-foreground">Gerencie seus leads e potenciais clientes</p>
           </div>
-          <Link to="/pipeline">
-            <Button>
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Pipeline de Vendas
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to="/marketing">
+              <Button variant="outline">
+                Marketing WhatsApp
+              </Button>
+            </Link>
+            <Link to="/pipeline">
+              <Button>
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Pipeline de Vendas
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -196,13 +204,14 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell>{getStatusBadge(lead.status)}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1 flex-wrap">
                         <Button asChild size="sm" variant="outline">
                           <Link to={`/lead/${lead.id}`}>
                             <Eye className="h-3 w-3 mr-1" />
                             Ver
                           </Link>
                         </Button>
+                        <WhatsAppButton lead={lead} />
                         {lead.status !== "potencial" && (
                           <Button
                             size="sm"
