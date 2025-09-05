@@ -11,6 +11,7 @@ export interface Lead {
   status: "novo" | "potencial" | "descartado";
   pipeline_stage: "prospecto" | "qualificado" | "proposta" | "negociacao" | "fechado" | "perdido";
   value: number;
+  proposalValue: number;
   createdAt: string;
   notes?: string;
   position?: string;
@@ -31,6 +32,7 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "prospecto",
     value: 15000,
+    proposalValue: 15000,
     createdAt: "2024-01-15",
     position: "CEO",
     notes: "Interessado em soluções de automação para empresa",
@@ -47,6 +49,7 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "qualificado",
     value: 25000,
+    proposalValue: 25000,
     createdAt: "2024-01-14",
     position: "CTO",
     notes: "Empresa em crescimento, orçamento aprovado"
@@ -62,6 +65,7 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "proposta",
     value: 35000,
+    proposalValue: 35000,
     createdAt: "2024-01-12",
     position: "Diretora de TI"
   },
@@ -76,6 +80,7 @@ const mockLeads: Lead[] = [
     status: "potencial",
     pipeline_stage: "fechado",
     value: 80000,
+    proposalValue: 80000,
     createdAt: "2024-01-10"
   }
 ];
@@ -141,7 +146,7 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const getTotalValue = (stage: Lead["pipeline_stage"]) => {
-    return getLeadsByStage(stage).reduce((sum, lead) => sum + lead.value, 0);
+    return getLeadsByStage(stage).reduce((sum, lead) => sum + lead.proposalValue, 0);
   };
 
   const removeLead = (leadId: string) => {
@@ -153,7 +158,7 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const getActiveLeadsValue = () => {
-    return getActiveLeads().reduce((sum, lead) => sum + lead.value, 0);
+    return getActiveLeads().reduce((sum, lead) => sum + lead.proposalValue, 0);
   };
 
   return (

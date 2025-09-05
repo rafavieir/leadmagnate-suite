@@ -345,6 +345,28 @@ const LeadDetails = () => {
                 </div>
 
                 <div>
+                  <Label htmlFor="proposalValue">Valor da Proposta</Label>
+                  {isEditing ? (
+                    <Input
+                      id="proposalValue"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={formData.proposalValue}
+                      onChange={(e) => setFormData({ ...formData, proposalValue: parseFloat(e.target.value) || 0 })}
+                      placeholder="R$ 0,00"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground font-semibold text-green-600">
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL'
+                      }).format(lead.proposalValue)}
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <Label htmlFor="linkedinUrl">LinkedIn</Label>
                   {isEditing ? (
                     <Input

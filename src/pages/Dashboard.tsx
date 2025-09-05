@@ -171,7 +171,7 @@ const Dashboard = () => {
                   <TableHead>Empresa</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Fonte</TableHead>
-                  <TableHead>Valor</TableHead>
+                  <TableHead>Valor da Proposta</TableHead>
                   <TableHead>Score</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Ações</TableHead>
@@ -186,7 +186,7 @@ const Dashboard = () => {
                     <TableCell>{lead.source}</TableCell>
                     <TableCell>
                       <span className="font-semibold text-green-600">
-                        {formatCurrency(lead.value)}
+                        {formatCurrency(lead.proposalValue)}
                       </span>
                     </TableCell>
                     <TableCell>

@@ -100,7 +100,7 @@ const Pipeline = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {formatCurrency(getActiveLeads().filter(l => !['fechado', 'perdido'].includes(l.pipeline_stage)).reduce((sum, lead) => sum + lead.value, 0))}
+                {formatCurrency(getActiveLeads().filter(l => !['fechado', 'perdido'].includes(l.pipeline_stage)).reduce((sum, lead) => sum + lead.proposalValue, 0))}
               </div>
             </CardContent>
           </Card>
@@ -174,7 +174,7 @@ const Pipeline = () => {
                             </div>
                             <div className="flex items-center justify-between mt-2">
                               <span className="text-sm font-semibold text-green-600">
-                                {formatCurrency(lead.value)}
+                                {formatCurrency(lead.proposalValue)}
                               </span>
                               <Badge variant="outline" className="text-xs">
                                 Score: {lead.score}
