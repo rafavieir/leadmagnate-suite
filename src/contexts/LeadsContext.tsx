@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 export interface Lead {
   id: string;
@@ -20,71 +20,6 @@ export interface Lead {
   lossReason?: string;
 }
 
-const mockLeads: Lead[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@empresa.com",
-    company: "TechCorp",
-    phone: "(11) 99999-9999",
-    source: "Website",
-    score: 85,
-    status: "potencial",
-    pipeline_stage: "prospecto",
-    value: 15000,
-    proposalValue: 15000,
-    createdAt: "2024-01-15",
-    position: "CEO",
-    notes: "Interessado em soluções de automação para empresa",
-    linkedinUrl: "https://linkedin.com/in/joaosilva"
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@startup.com",
-    company: "StartupXYZ",
-    phone: "(11) 88888-8888",
-    source: "LinkedIn",
-    score: 92,
-    status: "potencial",
-    pipeline_stage: "qualificado",
-    value: 25000,
-    proposalValue: 25000,
-    createdAt: "2024-01-14",
-    position: "CTO",
-    notes: "Empresa em crescimento, orçamento aprovado"
-  },
-  {
-    id: "4",
-    name: "Ana Oliveira",
-    email: "ana@bigcompany.com",
-    company: "BigCompany Ltd",
-    phone: "(11) 66666-6666",
-    source: "Referral",
-    score: 78,
-    status: "potencial",
-    pipeline_stage: "proposta",
-    value: 35000,
-    proposalValue: 35000,
-    createdAt: "2024-01-12",
-    position: "Diretora de TI"
-  },
-  {
-    id: "5",
-    name: "Carlos Ferreira",
-    email: "carlos@solucoes.com",
-    company: "Soluções Tech",
-    phone: "(11) 55555-5555",
-    source: "Website",
-    score: 95,
-    status: "potencial",
-    pipeline_stage: "fechado",
-    value: 80000,
-    proposalValue: 80000,
-    createdAt: "2024-01-10"
-  }
-];
-
 interface LeadsContextType {
   leads: Lead[];
   updateLeadStatus: (leadId: string, newStatus: "novo" | "potencial" | "descartado") => void;
@@ -96,93 +31,88 @@ interface LeadsContextType {
   getTotalValue: (stage: Lead["pipeline_stage"]) => number;
   getActiveLeadsValue: () => number;
   getActiveLeads: () => Lead[];
+  syncFromSheets: () => Promise<void>;
 }
 
 const LeadsContext = createContext<LeadsContextType | undefined>(undefined);
 
+async function fetchLeadsFromSheets(): Promise<Lead[]> {
+  const r = await fetch("/api/leads-from-sheets");
+  if (!r.ok) throw new Error("Falha ao buscar leads do Sheets");
+  const data = await r.json();
+  return (data?.leads ?? []) as Lead[];
+}
+
 export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
+  const [leads, setLeads] = useState<Lead[]>([]);
+
+  const syncFromSheets = async () => {
+    try {
+      const next = await fetchLeadsFromSheets();
+      setLeads(next);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const updateLeadStatus = (leadId: string, newStatus: "novo" | "potencial" | "descartado") => {
     if (newStatus === "descartado") {
       removeLead(leadId);
     } else {
-      setLeads(prev => 
-        prev.map(lead => 
-          lead.id === leadId ? { ...lead, status: newStatus } : lead
-        )
-      );
+      setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l)));
     }
   };
 
   const moveLeadToStage = (leadId: string, newStage: Lead["pipeline_stage"], lossReason?: string) => {
-    setLeads(prev => 
-      prev.map(lead => 
-        lead.id === leadId 
-          ? { ...lead, pipeline_stage: newStage, ...(lossReason && { lossReason }) }
-          : lead
-      )
+    setLeads((prev) =>
+      prev.map((l) => (l.id === leadId ? { ...l, pipeline_stage: newStage, ...(lossReason && { lossReason }) } : l))
     );
   };
 
   const addLead = (newLead: Omit<Lead, "id">) => {
-    const lead: Lead = {
-      ...newLead,
-      id: Date.now().toString()
-    };
-    setLeads(prev => [...prev, lead]);
+    setLeads((prev) => [...prev, { ...newLead, id: Date.now().toString() }]);
   };
 
   const updateLead = (leadId: string, updates: Partial<Lead>) => {
-    setLeads(prev => 
-      prev.map(lead => 
-        lead.id === leadId ? { ...lead, ...updates } : lead
-      )
-    );
-  };
-
-  const getLeadsByStage = (stage: Lead["pipeline_stage"]) => {
-    return leads.filter(lead => lead.pipeline_stage === stage);
-  };
-
-  const getTotalValue = (stage: Lead["pipeline_stage"]) => {
-    return getLeadsByStage(stage).reduce((sum, lead) => sum + lead.proposalValue, 0);
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, ...updates } : l)));
   };
 
   const removeLead = (leadId: string) => {
-    setLeads(prev => prev.filter(lead => lead.id !== leadId));
+    setLeads((prev) => prev.filter((l) => l.id !== leadId));
   };
 
-  const getActiveLeads = () => {
-    return leads.filter(lead => lead.status !== "descartado" && lead.pipeline_stage !== "perdido");
-  };
+  const getLeadsByStage = (stage: Lead["pipeline_stage"]) => leads.filter((l) => l.pipeline_stage === stage);
 
-  const getActiveLeadsValue = () => {
-    return getActiveLeads().reduce((sum, lead) => sum + lead.proposalValue, 0);
-  };
+  const getTotalValue = (stage: Lead["pipeline_stage"]) =>
+    getLeadsByStage(stage).reduce((sum, l) => sum + l.proposalValue, 0);
+
+  const getActiveLeads = () => leads.filter((l) => l.status !== "descartado" && l.pipeline_stage !== "perdido");
+
+  const getActiveLeadsValue = () => getActiveLeads().reduce((sum, l) => sum + l.proposalValue, 0);
 
   return (
-    <LeadsContext.Provider value={{
-      leads,
-      updateLeadStatus,
-      moveLeadToStage,
-      addLead,
-      updateLead,
-      removeLead,
-      getLeadsByStage,
-      getTotalValue,
-      getActiveLeads,
-      getActiveLeadsValue
-    }}>
+    <LeadsContext.Provider
+      value={{
+        leads,
+        updateLeadStatus,
+        moveLeadToStage,
+        addLead,
+        updateLead,
+        removeLead,
+        getLeadsByStage,
+        getTotalValue,
+        getActiveLeads,
+        getActiveLeadsValue,
+        syncFromSheets,
+      }}
+    >
       {children}
     </LeadsContext.Provider>
   );
 };
 
 export const useLeads = () => {
-  const context = useContext(LeadsContext);
-  if (context === undefined) {
-    throw new Error('useLeads must be used within a LeadsProvider');
-  }
-  return context;
+  const ctx = useContext(LeadsContext);
+  if (!ctx) throw new Error("useLeads must be used within a LeadsProvider");
+  return ctx;
 };
